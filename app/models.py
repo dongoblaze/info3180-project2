@@ -27,6 +27,7 @@ class Users(db.Model):
     password=db.Column(db.String(150))
     firstname=db.Column(db.String(150))
     lastname=db.Column(db.String(150))
+    gender=db.Column(db.String(80))
     email=db.Column(db.String(150))
     location=db.Column(db.String(150))
     biography=db.Column(db.String(250))
@@ -38,6 +39,7 @@ class Users(db.Model):
         self.password=generate_password_hash(password, method='pbkdf2:sha256')
         self.firstname=firstname
         self.lastname=lastname
+        self.gender=gender
         self.email=email
         self.location=location
         self.biography=bio
