@@ -114,6 +114,11 @@ def send_text_file(file_name):
     return app.send_static_file(file_dot_text)
 
 
+@login_manager.user_loader
+def load_user(id):
+    return Users.query.get(int(id))
+
+
 @app.route('/api/auth/login',methods=['POST'])
 def login():
     # Here we use a class of some kind to represent and validate our
@@ -151,6 +156,18 @@ def login():
 
     return jsonify(errors=[{"errors":form_errors(form)}])
 
+@app.route('/api/auth/logout',methods=['GET']) 
+# @requires_auth
+def logout():
+    """logout users"""
+    g.currrent_user=None
+    if session['userid']:
+        session.pop('userid')  
+        logout={"message":"User successfully logged out"}
+        return jsonify(response=[logout])
+    return jsonify(errors=[{"errors":"not logout"}])
+
+
 @app.route('/api/posts/<post_id>/like',methods=['POST'])
 #@login_required
 # @requires_auth
@@ -165,6 +182,35 @@ def like(post_id):
         total_likes = len(Likes.query.filter_by(post_id=post).all())
         return jsonify (response=[{'message': 'You liked a user post','likes':total_likes}])
     return jsonify (error=[{'error': 'unable to create link'}])
+
+@app.route('/api/users/<user_id>/follow',methods=['POST'])
+#@login_required
+# @requires_auth
+def follow(user_id): 
+    """create a follow relationship between the current user and the target user."""
+    if request.method == 'POST':
+        target_user=int(request.form['user_id'])
+        current_user=int(request.form['follower_id'])
+        follows=Follows.query.filter_by(user_id=target_user).all()
+        check=''
+        for follow in follows:
+            if current_user==follow.follower_id:
+                check=1
+                
+        if check!=1:
+            follow =Follows(target_user,current_user)
+            db.session.add(follow)
+            db.session.commit()
+            user = Users.query.filter_by(id=target_user).first()
+            msg="You are now following that user."+ user.username
+            numfollow=len(Follows.query.filter_by(user_id=target_user).all())
+            return jsonify (response=[{"message":msg,"follow":numfollow}]) 
+        else:
+            numfollow=len(Follows.query.filter_by(user_id=target_user).all())
+            return jsonify (response=[{"message":"You are already following that user.","follow":numfollow}]) 
+    else:
+        return jsonify (errors=[{'error': 'unable to create link'}])
+
 
 @app.after_request
 def add_header(response):
