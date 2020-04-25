@@ -29,15 +29,36 @@ Vue.component('app-footer', {
 });
 
 const Home = Vue.component('home', {
-   template: `
-    <div class="jumbotron">
-        <h1>Lab 7</h1>
-        <p class="lead">In this lab we will demonstrate VueJS working with Forms and Form Validation from Flask-WTF.</p>
+    template: `
+    <div @mouseover="Reset">
+          <h6 v-if="text=='User successfully logged out'" class="success">{{text}}</h6>
+          
+          <div v-if="uc!=''" id="home">
+           <h1>  Photogram </h1>
+            <p> Share Life experiences and moments.<br>So Please enjoy</p><br>
+        
+          </div>
+             
+         <div v-else class="Frame">
+          
+             <router-link to="/register" class="btn btn-primary greenbut">Register</router-link>&nbsp
+             <router-link to="/login" class="btn btn-primary butsize">login</router-link>
+            </div>
+           
     </div>
-   `,
-    data: function() {
-       return {}
-    }
+     `,
+data: function(){
+    return{
+        uc:User_id,
+        text:msg
+    };   
+    },
+ methods:{
+      Reset:function ()
+        {
+            this.text="";
+        }
+   }
 });
 
 const NotFound = Vue.component('not-found', {
