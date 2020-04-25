@@ -5,13 +5,15 @@ Werkzeug Documentation:  http://werkzeug.pocoo.org/documentation/
 This file creates your application.
 """
 import os
-import jwt 
+import jwt
+
+ 
 
 from app import app, db, login_manager,token_key
-from flask import render_template, request, redirect, url_for, flash, jsonify,json, session
+from flask import render_template, request, redirect, url_for, flash, jsonify,json, session , _request_ctx_stack 
 from flask_login import login_user, logout_user, current_user, login_required
-from forms import UserRegistration, LoginForm, PostForm 
-from models import Users,Posts,Follows, Likes
+from.forms import UserRegistration, LoginForm, PostForm 
+from .models import Users,Posts,Follows, Likes
 from werkzeug.utils import secure_filename
 from werkzeug.security import check_password_hash,generate_password_hash
 ###
@@ -41,7 +43,47 @@ def home():
     """Render website's initial page and let VueJS take over."""
     return render_template('home.html', form=form)
 
+@app.route('/api/users/register', methods=['POST'])
+def register():
+    """accepts user information and save it to the database"""
+    form=UserRegistration()
+    # now = datetime.datetime.now()
+    if request.method == 'POST' and form.validate_on_submit():
+        username= form.username.data
+        password = form.password.data
+        confirmpassword = form.confirmpassword.data
+        firstname = form.firstname.data
+        lastname = form.lastname.data
+        gender = form.gender.data
+        email = form.email.data
+        location = form.location.data
+        bio=form.bio.data
+        photo=form.photo.data
+        filename = secure_filename(photo.filename)
 
+        photo.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        photo='/static/uploads/'+ filename
+        # date=now.strftime("%B %d, %Y")
+        
+        user = Users.query.filter_by(username=username).first()
+
+        if user is None :
+        
+            if password == confirmpassword:
+                user=Users(username, password, firstname, lastname, gender, location, email, bio, photo, date)
+                db.session.add(user)
+                db.session.commit()
+                flash('You are now registered', 'success')
+                return jsonify(response=[{"message":"User successfully registered"}])
+            else:
+                flash("Password and Confirmpassword don't match", 'danger')
+                return jsonify(response=[{"message":"Password and Confirmpassword don't match"}])
+
+                 
+        elif user is not None:
+            flash("already a member", 'danger')
+            return jsonify(errors=[{"error":"You are already a member"}])
+    return jsonify(errors=[{"errors":form_errors(form)}])
 
 
 # Here we define a function to collect form errors from Flask-WTF
@@ -85,7 +127,7 @@ def login():
         username = form.username.data
         password = form.password.data
         
-        user = UserProfile.query.filter_by(username=username).first()
+        user = Users.query.filter_by(username=username).first()
         
         if user is not None and check_password_hash(user.password, password):
             remember_me = False
@@ -111,16 +153,16 @@ def login():
 
 @app.route('/api/posts/<post_id>/like',methods=['POST'])
 #@login_required
-@requires_auth
+# @requires_auth
 def like(post_id):
     """ set a like on the current post by the logged in user"""
     if request.method == 'POST':
         user_id=int(request.form['user_id'])
         post=int(request.form['post_id'])
-        like = UserLikes(user_id,post)
+        like = Likes(user_id,post)
         db.session.add(like)
         db.session.commit()
-        total_likes = len(UserLikes.query.filter_by(post_id=post).all())
+        total_likes = len(Likes.query.filter_by(post_id=post).all())
         return jsonify (response=[{'message': 'You liked a user post','likes':total_likes}])
     return jsonify (error=[{'error': 'unable to create link'}])
 
