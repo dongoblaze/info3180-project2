@@ -31,10 +31,10 @@ class Users(db.Model):
     email=db.Column(db.String(150))
     location=db.Column(db.String(150))
     biography=db.Column(db.String(250))
-    profile_photo=db.Column(db.String(150))
+    photo=db.Column(db.String(150))
     joined_on=db.Column(db.Date)
 
-    def __init__(self, username, password, firstname, lastname, email, location, biography, profile_photo, joined_on):
+    def __init__(self, username, password, firstname, lastname, email, location, biography, photo, joined_on):
         self.username=username
         self.password=generate_password_hash(password, method='pbkdf2:sha256')
         self.firstname=firstname
@@ -43,7 +43,7 @@ class Users(db.Model):
         self.email=email
         self.location=location
         self.biography=bio
-        self.profile_photo=profile_photo
+        self.photo=photo
         self.joined_on=date
 
 #Create Likes database
@@ -60,13 +60,13 @@ class Likes(db.Model):
 
 #Create Follows database
 class Follows(db.Model):
-    id=db.Column, (db.Integer, primary_key=True)
+    id=db.Column(db.Integer, primary_key=True)
     user_id=db.Column(db.Integer)
     follower_id=db.Column(db.Integer)
 
     def __init__(self, user_id, follower_id):
-    self.user_id=user_id
-    self.follower_id=follower_id
+        self.user_id=user_id
+        self.follower_id=follower_id
 
 
     def is_authenticated(self):
