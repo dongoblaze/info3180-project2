@@ -16,7 +16,7 @@ class Posts(db.Model):
         self.user_id=user_id
         self.photo=photo
         self.caption=caption
-        sef.created_on=created_on
+        self.created_on=created_on
 
 #Create Users database
 class Users(db.Model):

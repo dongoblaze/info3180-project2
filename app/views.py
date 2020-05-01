@@ -70,8 +70,8 @@ def register():
         if user is None :
         
             if password == confirmpassword:
-                user=Users(username, password, firstname, lastname, gender, location, email, bio, photo, date)
-                db.session.add(user)
+                user=users(username, password, firstname, lastname, gender, location, email, bio, photo, date)
+                db.session.add(users)
                 db.session.commit()
                 flash('You are now registered', 'success')
                 return jsonify(response=[{"message":"User successfully registered"}])
@@ -132,7 +132,7 @@ def login():
         username = form.username.data
         password = form.password.data
         
-        user = Users.query.filter_by(username=username).first()
+        user = users.query.filter_by(username=username).first()
         
         if user is not None and check_password_hash(user.password, password):
             remember_me = False
@@ -185,7 +185,7 @@ def like(post_id):
 
 @app.route('/api/users/<user_id>/follow',methods=['POST'])
 #@login_required
-# @requires_auth
+# @requirles_auth
 def follow(user_id): 
     """create a follow relationship between the current user and the target user."""
     if request.method == 'POST':

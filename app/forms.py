@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileRequired, FileAllowed
 from wtforms import StringField,TextAreaField, PasswordField,SelectField,BooleanField
-from wtforms.validators import InputRequired, Email
+from wtforms.validators import InputRequired,DataRequired, Email
 
 class UserRegistration(FlaskForm):
     username= StringField('Username', validators=[InputRequired()])
@@ -24,4 +24,3 @@ class PostForm(FlaskForm):
     photo= FileField("Photo", validators=[FileRequired(), FileAllowed(["png", "jpg", "jpeg","Image Only"])])
     caption= TextAreaField("Caption", validators=[InputRequired()])
 
-cd 
