@@ -1,3 +1,14 @@
 body {
     padding-top: 5rem;
+    background-color:#fae4e4;
+
+
+}
+
+#form{
+    background-color: white;
+    border-top: 3px solid blue ;
+    border-radius: 10px;
+    padding:45px;
+    padding-right: 250px;
 }

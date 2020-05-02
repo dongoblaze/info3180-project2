@@ -68,11 +68,22 @@ const Home = Vue.component('home', {
           </div>
              
          <div v-else class="Frame">
-          
-             <router-link to="/register" class="btn btn-primary greenbut">Register</router-link>&nbsp
-             <router-link to="/login" class="btn btn-primary butsize">login</router-link>
+            <div class="homePic">
+                <img src="/static/uploads/img.jpg" alt="home page picture" style="width:400px;height:400px;"/>
             </div>
-           
+            <div class="Welcome">
+                <div class="padtext">
+                    <h1><img src="/static/uploads/img.jpg" alt="home page picture" style="width:20px;height:20px;"/> Photogram</h1>
+                    </div>
+                    <div class="pad">
+                    <p> Share photos of your favourite moments with friends, family and the world.</p> 
+                    </div>
+            
+                <div>   
+                <router-link to="/register" class="btn btn-success">Register</router-link>&nbsp
+                <router-link to="/login" class="btn btn-primary">Login</router-link>
+                </div>
+                </div>   
     </div>
      `,
 data: function(){
@@ -216,30 +227,95 @@ const Explore=Vue.component('explore',{
 const Register = Vue.component('register',{
     template:`
     <div class="d-flex justify-content-center"> 
-    <h2>Register</h2>
-    <form action="/api/users/register" method="POST" enctype="multipart/form-data" @submit.prevent="UserRegistration">
-    <label>Username</label>
-    <input type="text"/>
-    <label>Password</label>
-    <input type="password"/>
-    <label>Firstname</label>
-    <input type= "text"/>
-    <label>Lastname</label>
-    <input type="text"/>
-    <label>Email</label>
-    <input type="email"/>
-    <label>Location</label>
-    <input type="text"/>
-    <label>Biography</label>
-    <textarea></textarea>
-    <label>Photo</label>
-    <input type="file" accept="image/*"/>
-    <br>
-    <button type="submit" class="btn btn-success">
-    </form>
+    
+    <h1 class="display-1"> <strong> Registration</strong></h1>
+    <div id="form">
+        <form class="form" action="/api/users/register" method="POST" enctype="multipart/form-data" @submit.prevent="UserRegistration">
+        
+        <div class="form-group">
+            <div class="row">
+                <div class="col-sm-10">
+                    <label>Username</label>
+                    <input type="text"class="form-control"/>
+                </div>
+            </div> 
+        </div>
+        <div class="form-group">
+            <div class="row">
+                <div class="col-sm-10">
+                    <label>Password</label>
+                    <input type="password" class="form-control"/>
+                </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="row">
+                <div class="col-sm-10">
+            
+                    <label>Firstname</label>
+                    <input type= "text" class="form-control"/>
+                </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="row">
+                <div class="col-sm-10">
+                    
+                    <label>Lastname</label>
+                    <input type="text"class="form-control"/>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="row">
+                <div class="col-sm-10">
+                    <label>Email</label>
+                    <input type="email"class="form-control"/>
+                </div>
+            </div>   
+        </div>
+        <div class="form-group">
+            <div class="row">
+                <div class="col-sm-10">
+                    
+                    <label>Location</label>
+                    <input type="text"class="form-control"/>
+                    
+                </div>
+            </div> 
+        </div>
+        <div class="form-group">
+            <div class="row">
+                <div class="col-sm-10">
+                    <label>Biography</label>
+                    <textarea class="form-control"> </textarea>
+                </div>
+            </div> 
+        </div>
+        <div class="form-group">
+            <div class="row">
+                <div class="col-lg-11">
+                    <div class="form-group">
+                        <label>Photo</label>
+                        <input type="file" accept="image/*" class="form-control"/>
+                    </div>
+                </div>
+            </div>   
+        </div>    
+        
+            <div class="col-lg-11">
+                    <div class="form-group">  
+                        <button type="submit" class="btn btn-success"> Submit</button>
+                    </div>
+            </div>
+                    
+        </div>
     </div>
+        </form>
+
     `
-})
+});
 
 const Post= Vue.component('post',{
     template:`
