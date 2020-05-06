@@ -6,11 +6,13 @@ let msg='';
 Vue.component('app-header', {
     template:`
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
-      <a class="navbar-brand" href="/"><i class="fa fa-instagram" >Photogram</i></a>
+      <a class="navbar-brand" href="/"><i class="fa fa-instagram" > <img class="icon" src="../static/cam.png"/>Photogram</i></a>
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
     
+
+
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav mr-auto">
         </ul>
@@ -22,7 +24,7 @@ Vue.component('app-header', {
                 <router-link class="nav-link" to="/explore">Explore </router-link>
             </li> 
             <li class="nav-item active">
-                <router-link class="nav-link" to="">My Profile</router-link>
+            <router-link to="/users/:user_id" class="nav-link">My Profile</router-link>
             </li> 
             <li class="nav-item active">
                 <router-link class="nav-link" to="/logout">Logout </router-link>
@@ -62,18 +64,22 @@ const Home = Vue.component('home', {
           <h6 v-if="text=='User successfully logged out'" class="success">{{text}}</h6>
           
           <div v-if="uc!=''" id="home">
-           <h1>  Photogram </h1>
-            <p> Share Life experiences and moments.<br>So Please enjoy</p><br>
-        
+          
+            <div class="float-">
+                <h1>  Photogram </h1>
+                    <p> Share Life experiences and moments.<br>So Please enjoy</p><br>
+            </div>
           </div>
              
          <div v-else class="Frame">
+         <div class="row mx-md-n5">
             <div class="homePic">
-                <img src="/static/uploads/img.jpg" alt="home page picture" style="width:400px;height:400px;"/>
+                <img class="rounded float-left" src="/static/uploads/img.jpg" alt="home page picture" style="width:400px;height:400px;"/>
             </div>
+        </div>
             <div class="Welcome">
                 <div class="padtext">
-                    <h1><img src="/static/uploads/img.jpg" alt="home page picture" style="width:20px;height:20px;"/> Photogram</h1>
+                    <h1> Photogram</h1>
                     </div>
                     <div class="pad">
                     <p> Share photos of your favourite moments with friends, family and the world.</p> 
@@ -83,7 +89,8 @@ const Home = Vue.component('home', {
                 <router-link to="/register" class="btn btn-success">Register</router-link>&nbsp
                 <router-link to="/login" class="btn btn-primary">Login</router-link>
                 </div>
-                </div>   
+                </div> 
+        </div>  
     </div>
      `,
 data: function(){
@@ -113,43 +120,76 @@ const NotFound = Vue.component('not-found', {
 
 const Login = Vue.component('login',{
     template:`
-    <div class="d-flex justify-content-center">
-    <h2>Login </h2>
-    <form action="/api/auth/login" method= "POST" enctype="multipart/form-data" @submit.prevent="LoginForm">
-    <div class="">
-    <label>Username</label>
-    <input type="text"/>
-    <label>Password</label>
-    <input type="password"/>
-    <button type="submit" class="btn btn-success">Login</button>
-    </div>
-    </form>
-    </div>
-     `,
-    //  data: function(){
-    //     return{
-    //          msg:[],
-    //          text:[]
-    //     }
-    // },
-    // methods:{
-    //     LoginForm: function(){
-    //         let self = this;
-    //         let loginForm= document.getElementById('login');
-    //         let form_data = new FormData(loginForm);
     
-    //         fetch("/api/auth/login",{
-    //             method:'POST',
-    //             body: form_data,
-    //             headers:{
-    //                 'X-CSRFToken':token
-    //             },
-    //             credentials: 'same-origin'
-    //         })
-    //           .then(function(response){
-    //               return response.json();
-    //           })
-    //           .then(function(jsonResponse){
+     <div class="d-flex justify-content-center">
+        <h1> <strong>login</strong> </h1>
+        <div id="form">
+            <form action="/api/auth/login" method= "POST" enctype="multipart/form-data" id="login" @submit.prevent="LoginForm">
+                <div class="form-group">
+                    <label>Username</label>
+                    <input name="username" type="username" class="form-control"/>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input name="password" type="password" class="form-control"/>
+                </div>
+                <button type="submit" class="btn btn-success">Login</button>
+        
+            </form>   
+        </div>    
+    </div>
+    `,
+     data: function(){
+        return{
+             msg:[],
+             text:[]
+        }
+    },
+    methods:{
+        LoginForm: function(){
+            let self = this;
+            let loginForm= document.getElementById('login');
+            let form_data = new FormData(loginForm);
+    
+            fetch("/api/auth/login",{
+                method:'POST',
+                body: form_data,
+                headers:{
+                    'X-CSRFToken':token
+                },
+                credentials: 'same-origin'
+            })
+              .then(function(response){
+                  return response.json();
+              })
+              .then(function(jsonResponse){
+                if(jsonResponse.response!=null)
+                  {
+                    User_id=jsonResponse.response["0"].user;
+                    let jwt_token=jsonResponse.response["0"].token;
+                    localStorage.setItem('token',jwt_token);
+                    localStorage.setItem('userid',User_id);
+                    self.$router.push("/explore");
+                    msg="Login was successfully";
+                    let logout= document.getElementById('logout'); 
+                    logout.classList.remove('hid');
+                  }
+                  else{
+                      self.msg=jsonResponse.errors['0'];
+                  }
+              })
+              .catch(function(errors){
+                  //console.log(errors);
+              });
+        },
+    Reset:function (){
+         this.text="";
+         this.msg="";
+     }
+    },
+    created: function(){
+         this.text=msg;
+    }
 });
 
 const Logout= Vue.component('logout-form',{
@@ -217,11 +257,80 @@ const Explore=Vue.component('explore',{
                        </li>
                </ul>
             </div>
-           <div class="postbut ">
+           <div class="post ">
                <router-link class="btn btn-primary butsize1" to="/post/new">New Post</router-link>
            </div>
          </div>
-   </div>`
+   </div>`,
+
+   created: function(){
+    let self =this;
+    fetch('/api/posts',{
+            method:'GET',
+            'headers': {
+            'Authorization': 'Bearer ' + localStorage.getItem('token'),
+            'X-CSRFToken': token
+            },
+            credentials: 'same-origin'
+        })
+         .then(function(response){
+              return response.json();
+          })
+          .then(function(jsonResponse){
+              //display a success message
+              self.users = jsonResponse.response['0'].post; 
+              //console.log(jsonResponse);
+          })
+          .catch(function(error){
+              //console.log(error);
+          });
+},
+data: function(){
+    return{
+        users:[],
+        uc:User_id,
+        text:msg
+    };   
+    },
+methods:{
+    post:function(userp){
+            let self=this;
+            other=""+userp;
+            self.$router.push("/users/"+other);
+    },
+    Like:function(postid){
+        let self=this;
+        let post=""+postid;
+        let form_data = new FormData();
+        let se=self.uc;
+        form_data.append("user_id",se);
+        form_data.append("post_id",post);
+       
+        fetch('/api/posts/'+post+'/like',{
+                method:'POST',
+                body: form_data,
+                 'headers': {
+                        'Authorization': 'Bearer ' + localStorage.getItem('token'),
+                        'X-CSRFToken': token
+                    },
+                credentials: 'same-origin'
+            })
+             .then(function(response){
+                  return response.json();
+              })
+              .then(function(jsonResponse){
+                  //display a success message
+                  //console.log(jsonResponse);
+                  let loginForm= document.getElementById(postid).innerHTML=jsonResponse.response['0'].likes;
+              })
+              .catch(function(error){
+                  //console.log(error);
+              });
+        },
+    Reset: function(){
+        this.text="";
+    }
+}
 })
 
 const Register = Vue.component('register',{
@@ -230,13 +339,13 @@ const Register = Vue.component('register',{
     
     <h1 class="display-1"> <strong> Registration</strong></h1>
     <div id="form">
-        <form class="form" action="/api/users/register" method="POST" enctype="multipart/form-data" @submit.prevent="UserRegistration">
+        <form class="form" action="/api/users/register" method="POST" enctype="multipart/form-data" id="register"  @submit.prevent="UserRegistration">
         
         <div class="form-group">
             <div class="row">
                 <div class="col-sm-10">
                     <label>Username</label>
-                    <input type="text"class="form-control"/>
+                    <input name="username" type="text"class="form-control"/>
                 </div>
             </div> 
         </div>
@@ -244,25 +353,34 @@ const Register = Vue.component('register',{
             <div class="row">
                 <div class="col-sm-10">
                     <label>Password</label>
-                    <input type="password" class="form-control"/>
+                    <input  name="password"type="password" class="form-control"/>
                 </div>
             </div>
-        </div>
+        </div>  
+
+        <div class="form-group">
+            <div class="row">
+                <div class="col-sm-10">
+                    <label>ConfrimPassword</label>
+                    <input name="confirmpassword" type="password" class="form-control"/>
+                </div>
+            </div>
+        </div> 
         <div class="form-group">
             <div class="row">
                 <div class="col-sm-10">
             
                     <label>Firstname</label>
-                    <input type= "text" class="form-control"/>
+                    <input name="firstname" type= "text" class="form-control"/>
                 </div>
             </div>
         </div>
         <div class="form-group">
             <div class="row">
                 <div class="col-sm-10">
-                    
+                   
                     <label>Lastname</label>
-                    <input type="text"class="form-control"/>
+                    <input name="lastname" type="text"class="form-control"/>
                 </div>
             </div>
         </div>
@@ -270,8 +388,17 @@ const Register = Vue.component('register',{
         <div class="form-group">
             <div class="row">
                 <div class="col-sm-10">
+                   
+                    <label>Gender</label>
+                    <input name="gender" type="text"class="form-control"/>
+                </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="row">
+                <div class="col-sm-10">
                     <label>Email</label>
-                    <input type="email"class="form-control"/>
+                    <input name="email" type="email"class="form-control"/>
                 </div>
             </div>   
         </div>
@@ -280,7 +407,7 @@ const Register = Vue.component('register',{
                 <div class="col-sm-10">
                     
                     <label>Location</label>
-                    <input type="text"class="form-control"/>
+                    <input name="location" type="text"class="form-control"/>
                     
                 </div>
             </div> 
@@ -289,16 +416,16 @@ const Register = Vue.component('register',{
             <div class="row">
                 <div class="col-sm-10">
                     <label>Biography</label>
-                    <textarea class="form-control"> </textarea>
+                    <textarea name="bio" class="form-control"> </textarea>
                 </div>
-            </div> 
+            </div>  
         </div>
         <div class="form-group">
             <div class="row">
                 <div class="col-lg-11">
                     <div class="form-group">
                         <label>Photo</label>
-                        <input type="file" accept="image/*" class="form-control"/>
+                        <input name="photo" type="file" accept="image/*" class="form-control"/>
                     </div>
                 </div>
             </div>   
@@ -309,46 +436,255 @@ const Register = Vue.component('register',{
                         <button type="submit" class="btn btn-success"> Submit</button>
                     </div>
             </div>
-                    
+        </form>            
         </div>
     </div>
-        </form>
+    </div>        
+        
 
-    `
+    `,
+  data: function(){
+        return{
+            msg:[]
+        }
+    },
+ methods:{
+    UserRegistration: function(){
+        let self = this;
+        let registerForm= document.getElementById('register');
+        let form_data = new FormData(registerForm);
+
+        fetch("/api/users/register",{
+            method:'POST',
+            body: form_data,
+            headers:{
+                'X-CSRFToken': token
+            },
+            credentials: 'same-origin'
+          })
+          .then(function(response){
+              return response.json();
+          })
+          .then(function(jsonResponse){
+              //display a success message
+              if(jsonResponse.response!=null)
+                  {
+                    msg="User successfully registered. So login now and enjoy";
+                    self.$router.push("/login");
+                  }
+               else{
+                   self.msg=jsonResponse.errors['0'];
+                  }
+              //console.log(jsonResponse);
+              
+          })
+          .catch(function(errors){
+              //console.log(errors);
+          });
+    },
+Reset:function ()
+{
+    this.msg="";
+}
+}
+
 });
 
 const Post= Vue.component('post',{
     template:`
+    <div>
+        <div v-if="uc==''" class="error">
+           <p>Please login or sign-up to benefit from this Feature </p>
+        </div>
+       <div v-else class="Frame">
     <div class="d-flex justify-content-center"> 
     <div> 
-    <h2>New Post</h2> 
-    <form action="/api/users/user_id/posts" method="POST" enctype = "multipart/form-data" @submit.prevent="PostForm"> 
-    <label>Photo</label>
-    <input type="file" accept="image/*">
-    <div>
-    <label>Caption</label>
-    <textarea placeholder="Write a Caption ..."></textarea>
-    <br>
+    <h1>New Post</h1> 
+    <form action="/api/users/user_id/posts" method="POST" id="post" enctype = "multipart/form-data" @submit.prevent="PostForm"> 
+    <div class="form-group">
+        <label>Photo</label>
+        <input type="file" accept="image/*" class="form-control"/>
+    </div>
+    <div class="form-group">
+        <label>Caption</label>
+        <textarea placeholder="Write a Caption ..." class="form-control"></textarea>
+    </div>
+        <br>
     <router-link to="/explore"><button type="submit" class="btn btn-success">Submit</button></router-link>
-    </div>
-    <div>
     </form>
-    `
-})
-
-const Users =Vue.component('user_profile',{
-    template:`
-    <div class="d-flex justify-content-center">
-    <img class: "uphoto" v-bind:src=" "/>
-    <div class="info">
-       <h5>{{user.firstname}} {{user.lastname}}</h5>
-       {{user.location}}
-       <p>Member since: {{user.date}}</p>
-       {{user.bio}}
-       <button class="btn btn-success" v-on:click="follow" >Follow</button>
     </div>
+    
+    </div>
+    </div>
+    </div>`,
+
+    data: function() {
+        return {
+            uc:User_id,
+            error: []
+        };
+     },
+       methods:{
+         PostForm: function(){
+             let self = this;
+             let postForm= document.getElementById('post');
+             let form_data = new FormData(postForm);
+     
+             let userid = ""+self.uc;
+             fetch('/api/users/'+userid+'/posts',{
+                 method:'POST',
+                 body: form_data,
+                 'headers': {
+                 'Authorization': 'Bearer ' + localStorage.getItem('token'),
+                 'X-CSRFToken': token
+                  },
+                 credentials: 'same-origin'
+               })
+               .then(function(response){
+                   return response.json();
+               })
+               .then(function(jsonResponse){
+                   //display a success message
+                   //console.log(jsonResponse);
+                   if(jsonResponse.response["0"].message=="Successfully created a new post")
+                   {
+                     msg="Successfully created a new post";
+                     self.$router.push("/explore");
+                   }
+               })
+               .catch(function(error){
+                   //console.log(error);
+               });
+         }
+     }
+});
+
+const Users =Vue.component('users',{
+    template:`
+    <div>
+        <div v-if="uc==''" class="error">
+                <p>Please login or sign-up to benefit from this Feature </p>
+        </div>
+        <div class="d-flex justify-content-center">
+        <img v-bind:src="user.photo" alt="profile picture" style="width:200px;height:200px;padding-bottom:10px;padding-right:10px;">
+        <div class="info">
+        <h5>{{user.firstname}} {{user.lastname}}</h5>
+        {{user.location}}
+        <p>Member since: {{user.date}}</p>
+        {{user.biography}}
+        </div>
+        <div class="">
+        <span class="postscount"><h6>{{user.numpost}}</h6><br>Posts</span>
+        <span class="followscount"><h6 id="follow">{{user.numfollower}}</h6><br>Followers</span>
+        </div>
+        <br>
+        <span v-if="uc==user.id"><button class="btn btn-primary but butsize1 hid">Follow</button></span>
+        <span v-else-if=" uc in user.follower"><button class="btn btn-primary but butsize1">Following</button></span>
+        <button class="btn btn-success" v-on:click="follow" >Follow</button>
+
+        <div class="userpic">
+        <ul class="profilepost__list">
+            <li v-for="post in user.posts"class="post_item" >
+                <div class="">
+                <img v-bind:src="post.photo" alt="Post image" style="width:340px;height:200px;"/>
+                </div>
+            </li>
+        </ul>
+        </div>
+        </div>
+        </div>
     </div>
     `,
+    data: function() {
+        return {
+            user:[],
+            uc:User_id,
+            Other:other,
+            post:[],
+            follow:[]
+        };
+      },
+      created: function(){
+                  if (other==''){
+                          let self =this;
+                          let userid = ""+self.uc;
+                          fetch('/api/users/'+userid+'/posts',{
+                                  method:'GET',
+                                  'headers': {
+                                      'Authorization': 'Bearer ' + localStorage.getItem('token'),
+                                      'X-CSRFToken': token
+                                  },
+                                  credentials: 'same-origin'
+                              })
+                               .then(function(response){
+                                    return response.json();
+                                })
+                                .then(function(jsonResponse){
+                                    //display a success message
+                                    self.user= jsonResponse.response["0"]; 
+                                    //console.log(jsonResponse);
+                                })
+                                .catch(function(error){
+                                   // console.log(error);
+                                });
+                          }
+                  else{
+                       let self =this;
+                       let userid = ""+self.Other;
+                          fetch('/api/users/'+userid+'/posts',{
+                                  method:'GET',
+                                   'headers': {
+                                             'Authorization': 'Bearer ' + localStorage.getItem('token'),
+                                             'X-CSRFToken': token
+                                      },
+                                  credentials: 'same-origin'
+                              })
+                               .then(function(response){
+                                    return response.json();
+                                })
+                                .then(function(jsonResponse){
+                                    //display a success message
+                                    self.user= jsonResponse.response["0"]; 
+                                    //console.log(jsonResponse);
+                                })
+                                .catch(function(error){
+                                   //console.log(error);
+                                });
+                      }
+      },
+      methods:{
+          Follow:function(){
+              let self = this;
+              let userid = ""+self.Other;
+              let form_data = new FormData();
+              let se=self.uc;
+              form_data.append("user_id",userid);
+              form_data.append("follower_id",se);
+                      
+              fetch("/api/users/"+userid+"/follow", { 
+              method: 'POST',
+              body: form_data,
+              headers: {
+                  'Authorization': 'Bearer ' + localStorage.getItem('token'),
+                  'X-CSRFToken': token
+              },
+              credentials: 'same-origin'
+              })
+              .then(function (response) {
+              return response.json();
+              })
+              .then(function (jsonResponse) {
+              // display a success message
+              //console.log(jsonResponse);
+              let loginForm= document.getElementById('follow').innerHTML=jsonResponse.response['0'].follow;
+              let log= document.getElementById('fo').innerText="following";
+              })
+              .catch(function (error) {
+               //console.log(error);
+              });
+          }
+      }
+
 })
 
 

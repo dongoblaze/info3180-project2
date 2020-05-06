@@ -34,7 +34,7 @@ class Users(db.Model):
     photo=db.Column(db.String(150))
     joined_on=db.Column(db.Date)
 
-    def __init__(self, username, password, firstname, lastname, email, location, biography, photo, joined_on):
+    def __init__(self, username, password, firstname, lastname,gender, email, location, biography, photo, joined_on):
         self.username=username
         self.password=generate_password_hash(password, method='pbkdf2:sha256')
         self.firstname=firstname
@@ -42,9 +42,9 @@ class Users(db.Model):
         self.gender=gender
         self.email=email
         self.location=location
-        self.biography=bio
+        self.biography=biography
         self.photo=photo
-        self.joined_on=date
+        self.joined_on=joined_on
 
 #Create Likes database
 class Likes(db.Model):

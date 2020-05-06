@@ -13,14 +13,14 @@ class UserRegistration(FlaskForm):
     email= StringField("Email", validators=[InputRequired(), Email()])
     location= StringField("Location", validators=[InputRequired()])
     bio= TextAreaField("Biography", validators=[InputRequired()])
-    profile_photo= FileField("Photo", validators=[FileRequired(), FileAllowed(["png", "jpg", "jpeg","Images only"])])
+    photo= FileField("Photo", validators=[FileRequired(), FileAllowed(["png", "jpg", "jpeg","Images only"])])
 
 class LoginForm(FlaskForm):
     username= StringField("Username", validators=[InputRequired()])
     password= PasswordField("Password", validators=[InputRequired()])
-    remember_me = BooleanField('Remember me')
+   
 
 class PostForm(FlaskForm):
+   
     photo= FileField("Photo", validators=[FileRequired(), FileAllowed(["png", "jpg", "jpeg","Image Only"])])
     caption= TextAreaField("Caption", validators=[InputRequired()])
-

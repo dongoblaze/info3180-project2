@@ -6,7 +6,8 @@ This file creates your application.
 """
 import os
 import jwt
-
+import datetime
+import base64
  
 
 from app import app, db, login_manager,token_key
@@ -16,6 +17,7 @@ from.forms import UserRegistration, LoginForm, PostForm
 from .models import Users,Posts,Follows, Likes
 from werkzeug.utils import secure_filename
 from werkzeug.security import check_password_hash,generate_password_hash
+from functools import wraps 
 ###
 # Routing for your application.
 ###
@@ -36,42 +38,79 @@ def index(path):
     """
     return render_template('index.html')
 
-
+def format_date_joined():
+    datetime.datetime.now()
+    date_joined = datetime.datetime.now()
+    return "Memeber sice "   + date_joined.strftime("%B ,%Y") 
+    
 @app.route('/')
 def home():
     form=UserRegistration()
     """Render website's initial page and let VueJS take over."""
     return render_template('home.html', form=form)
 
+def requires_auth(f): 
+    @wraps(f) 
+    def decorated(*args, **kwargs):
+        auth = request.headers.get('Authorization', None)
+        if not auth:
+            return jsonify({'code': 'authorization_header_missing', 'description': 'Authorization header is expected'}), 401
+
+        parts = auth.split()
+
+        if parts[0].lower() != 'bearer':
+            return jsonify({'code': 'invalid_header', 'description': 'Authorization header must start with Bearer'}), 401
+        elif len(parts) == 1:
+            return jsonify({'code': 'invalid_header', 'description': 'Token not found'}), 401
+        elif len(parts) > 2:
+            return jsonify({'code': 'invalid_header', 'description': 'Authorization header must be Bearer + \s + token'}), 401
+
+        token = parts[1]
+        try:
+             payload = jwt.decode(token, token_key)
+             get_user = UserProfile.query.filter_by(id=payload['user_id']).first()
+
+        except jwt.ExpiredSignature:
+            return jsonify({'code': 'token_expired', 'description': 'token is expired'}), 401
+        except jwt.DecodeError:
+            return jsonify({'code': 'token_invalid_signature', 'description': 'Token signature is invalid'}), 401
+
+        g.current_user = user = get_user
+        return f(*args, **kwargs)
+
+    return decorated 
+
+
 @app.route('/api/users/register', methods=['POST'])
 def register():
-    """accepts user information and save it to the database"""
+    """accepts user information and save it to the database"""  
     form=UserRegistration()
     # now = datetime.datetime.now()
+    print("m")
     if request.method == 'POST' and form.validate_on_submit():
         username= form.username.data
         password = form.password.data
         confirmpassword = form.confirmpassword.data
         firstname = form.firstname.data
         lastname = form.lastname.data
-        gender = form.gender.data
+        gender = form.gender.data 
         email = form.email.data
         location = form.location.data
         bio=form.bio.data
         photo=form.photo.data
         filename = secure_filename(photo.filename)
-
+        print(filename)
         photo.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
         photo='/static/uploads/'+ filename
-        # date=now.strftime("%B %d, %Y")
-        
+        date_created = datetime.date.today()
+        # return "Memeber sice "     + date_joined.strftime("%B ,%Y") 
         user = Users.query.filter_by(username=username).first()
-
+        print("up")
         if user is None :
-        
+            print("o")
             if password == confirmpassword:
-                user=users(username, password, firstname, lastname, gender, location, email, bio, photo, date)
-                db.session.add(users)
+                user=Users(username, password, firstname, lastname, gender, location, email, bio, photo,date_created)
+                db.session.add(user)
                 db.session.commit()
                 flash('You are now registered', 'success')
                 return jsonify(response=[{"message":"User successfully registered"}])
@@ -85,7 +124,47 @@ def register():
             return jsonify(errors=[{"error":"You are already a member"}])
     return jsonify(errors=[{"errors":form_errors(form)}])
 
-
+@app.route('/api/users/<user_id>/posts',methods=["POST","GET"]) 
+@requires_auth
+@login_required
+def post(user_id):
+    """used for adding posts to the users feed"""
+    form=PostForm()
+    id=int(user_id)
+    now = datetime.datetime.now()
+    
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            photo=form.photo.data
+            caption= form.caption.data
+            filename = secure_filename(photo.filename)
+            photo.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            photo='/static/uploads/'+ filename
+            date=now.strftime("%B %d, %Y")                                                                                                                                                                     
+            user=Posts(user_id,photo,caption,date)
+            db.session.add(user)
+            db.session.commit()
+            return jsonify(response=[{"message":"Successfully created a new post"}])
+        else:
+            return jsonify(errors=[{"errors":form_errors(form)}])
+    if request.method == 'GET':
+        u=[]
+        f=[0,0]
+        userdetail =Users.query.filter_by(id=id).first()
+        Users =Posts.query.filter_by(user_id=id).all()
+        length=len(Users)
+        followers=Follows.query.filter_by(user_id=id).all()
+        follow=len(followers)
+        for follower in followers:
+            f.append(follower.user_id)
+        for user in Users:
+            u.append({'id':user.id,'user_id':user.user_id,'photo':user.photo,'caption':user.caption,
+            'created_on':user.created_on,'likes':0})
+        return jsonify(response=[{"id":user_id ,"username":userdetail.username,"firstname":userdetail.first_name,
+        "lastname":userdetail.last_name,"email":userdetail.email,"location": userdetail.location,"biography":userdetail.biography,
+        "profile_photo":userdetail.profile_photo,"joined_on":userdetail.joined_on,"posts":u,"numpost":length,"numfollower":follow,"follower":f}])
+    else:
+         return jsonify(error=[{"errors":"unable to create link"}])
 # Here we define a function to collect form errors from Flask-WTF
 # which we can later use
 def form_errors(form):
@@ -132,7 +211,7 @@ def login():
         username = form.username.data
         password = form.password.data
         
-        user = users.query.filter_by(username=username).first()
+        user = Users.query.filter_by(username=username).first()
         
         if user is not None and check_password_hash(user.password, password):
             remember_me = False
@@ -146,7 +225,7 @@ def login():
             #login_user(user, remember=remember_me)
             
             payload = {'user_id': user.id}
-            token = jwt.encode(payload,token_key)
+            token = jwt.encode(payload,token_key).decode('utf-8')
             session['userid']=user.id
             return jsonify(response=[{"token":token,"message":"login was successfully","user":user.id}])
             
@@ -166,6 +245,8 @@ def logout():
         logout={"message":"User successfully logged out"}
         return jsonify(response=[logout])
     return jsonify(errors=[{"errors":"not logout"}])
+
+
 
 
 @app.route('/api/posts/<post_id>/like',methods=['POST'])

@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block main %}
+<div class="d-flex justify-content-center"> 
+    <div> 
+    <h1>New Post</h1> 
+    <form action="/api/users/user_id/posts" method="POST" enctype = "multipart/form-data" @submit.prevent="PostForm"> 
+    <div class="form-group">
+        {{date}}
+    </div>
+    <div class="form-group">
+        <label>Caption</label>
+        <textarea placeholder="Write a Caption ..." class="form-control"></textarea>
+    </div>
+        <br>
+    <router-link to="/explore"><button type="submit" class="btn btn-success">Submit</button></router-link>
+    </div>
+    <div>
+    </form>
+{% endblock %}
