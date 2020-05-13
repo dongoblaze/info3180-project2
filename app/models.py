@@ -60,6 +60,7 @@ class Likes(db.Model):
 
 #Create Follows database
 class Follows(db.Model):
+    __tablename__ = 'follows'
     id=db.Column(db.Integer, primary_key=True)
     user_id=db.Column(db.Integer)
     follower_id=db.Column(db.Integer)

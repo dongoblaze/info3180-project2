@@ -64,11 +64,12 @@ def requires_auth(f):
             return jsonify({'code': 'invalid_header', 'description': 'Token not found'}), 401
         elif len(parts) > 2:
             return jsonify({'code': 'invalid_header', 'description': 'Authorization header must be Bearer + \s + token'}), 401
+            # return jsonify({'code': 'invalid_header', 'description': 'Authorization header must be Bearer + \s + token'}), 401
 
         token = parts[1]
         try:
              payload = jwt.decode(token, token_key)
-             get_user = UserProfile.query.filter_by(id=payload['user_id']).first()
+             get_user = Users.query.filter_by(id=payload['user_id']).first()
 
         except jwt.ExpiredSignature:
             return jsonify({'code': 'token_expired', 'description': 'token is expired'}), 401
@@ -86,7 +87,6 @@ def register():
     """accepts user information and save it to the database"""  
     form=UserRegistration()
     # now = datetime.datetime.now()
-    print("m")
     if request.method == 'POST' and form.validate_on_submit():
         username= form.username.data
         password = form.password.data
@@ -99,7 +99,7 @@ def register():
         bio=form.bio.data
         photo=form.photo.data
         filename = secure_filename(photo.filename)
-        print(filename)
+        
         photo.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
         photo='/static/uploads/'+ filename
         date_created = datetime.date.today()
@@ -236,7 +236,7 @@ def login():
     return jsonify(errors=[{"errors":form_errors(form)}])
 
 @app.route('/api/auth/logout',methods=['GET']) 
-# @requires_auth
+@requires_auth
 def logout():
     """logout users"""
     g.currrent_user=None
@@ -245,7 +245,6 @@ def logout():
         logout={"message":"User successfully logged out"}
         return jsonify(response=[logout])
     return jsonify(errors=[{"errors":"not logout"}])
-
 
 
 
@@ -266,7 +265,7 @@ def like(post_id):
 
 @app.route('/api/users/<user_id>/follow',methods=['POST'])
 #@login_required
-# @requirles_auth
+@requires_auth
 def follow(user_id): 
     """create a follow relationship between the current user and the target user."""
     if request.method == 'POST':

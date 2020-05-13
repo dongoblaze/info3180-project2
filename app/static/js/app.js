@@ -6,13 +6,11 @@ let msg='';
 Vue.component('app-header', {
     template:`
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
-      <a class="navbar-brand" href="/"><i class="fa fa-instagram" > <img class="icon" src="../static/cam.png"/>Photogram</i></a>
+      <a class="navbar-brand" href="/">  <img class="icon" src="../static/css/pic.jpg" style="width:20px;height:20px;"/>Photogram</a>
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
     
-
-
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav mr-auto">
         </ul>
@@ -55,7 +53,12 @@ Vue.component('app-footer', {
             <p>Copyright &copy; Flask Inc.</p>
         </div>
     </footer>
-    `
+    `,
+    data: function() {
+        return {
+            year: (new Date).getFullYear()
+        }
+    }
 });
 
 const Home = Vue.component('home', {
@@ -74,7 +77,7 @@ const Home = Vue.component('home', {
          <div v-else class="Frame">
          <div class="row mx-md-n5">
             <div class="homePic">
-                <img class="rounded float-left" src="/static/uploads/img.jpg" alt="home page picture" style="width:400px;height:400px;"/>
+                <img class="rounded float-left" src="/static/css/img.jpg" alt="home page picture" style="width:400px;height:400px;"/>
             </div>
         </div>
             <div class="Welcome">
@@ -425,7 +428,7 @@ const Register = Vue.component('register',{
                 <div class="col-lg-11">
                     <div class="form-group">
                         <label>Photo</label>
-                        <input name="photo" type="file" accept="image/*" class="form-control"/>
+                        <input name="photo" type="file" accept="image/*" class="form-control-file"/>
                     </div>
                 </div>
             </div>   
@@ -500,14 +503,15 @@ const Post= Vue.component('post',{
     <div class="d-flex justify-content-center"> 
     <div> 
     <h1>New Post</h1> 
-    <form action="/api/users/user_id/posts" method="POST" id="post" enctype = "multipart/form-data" @submit.prevent="PostForm"> 
+ 
+     <form action="/api/users/user_id/posts" method="POST" id="post" enctype = "multipart/form-data" @submit.prevent="PostForm"> 
     <div class="form-group">
         <label>Photo</label>
-        <input type="file" accept="image/*" class="form-control"/>
+        <input type="file" name=photo accept="image/*" class="form-control"/>
     </div>
     <div class="form-group">
         <label>Caption</label>
-        <textarea placeholder="Write a Caption ..." class="form-control"></textarea>
+        <textarea name=caption placeholder="Write a Caption ..." class="form-control"></textarea>
     </div>
         <br>
     <router-link to="/explore"><button type="submit" class="btn btn-success">Submit</button></router-link>
@@ -685,7 +689,7 @@ const Users =Vue.component('users',{
           }
       }
 
-})
+});
 
 
 Vue.use(VueRouter);
