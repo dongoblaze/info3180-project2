@@ -184,37 +184,23 @@ const Logout= Vue.component('logout-form',{
     <h2>Logout</h2>
     </div>
     `,
-    created: function() {
-        let self = this;
-        fetch("/api/auth/logout", { 
-             method: 'GET',
-            'headers': {
-                'Authorization': 'Bearer ' + localStorage.getItem('token'),
-                 'X-CSRFToken': token
-            },
-            credentials: 'same-origin' 
-          })
-            .then(function (response) {
+    created: function () {
+        fetch("api/auth/logout", {
+          method: "GET",
+        })
+          .then(function (response) {
             return response.json();
-            })
-            .then(function (jsonResponse){
-            // display a success message
-            //console.log(jsonResponse);
-                if(jsonResponse.response["0"].message=="User successfully logged out")
-                 {
-                    localStorage.removeItem('token');
-                    localStorage.removeItem('userid');
-                    msg="User successfully logged out";
-                    let logout= document.getElementById('logout'); 
-                    logout.classList.add('hid');
-                    User_id="";
-                    self.$router.push('/');
-                 }
-            })
-            .catch(function (error) {
-            //console.log(error);
-        });
-    }
+          })
+          .then(function (jsonResponse) {
+            console.log(js);
+            localStorage.removeItem("current_user");
+            router.go();
+            router.push("/");
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
+      },
 });
 
 const Explore=Vue.component('explore',{
@@ -549,131 +535,153 @@ const Post= Vue.component('post',{
 const Users =Vue.component('users',{
     template:`
     <div>
-        <div v-if="uc==''" class="error">
-                <p>Please login or sign-up to benefit from this Feature </p>
-        </div>
-        <div class="d-flex justify-content-center">
-        <img v-bind:src="user.photo" alt="profile picture" style="width:200px;height:200px;padding-bottom:10px;padding-right:10px;">
-        <div class="info">
-        <h5>{{user.firstname}} {{user.lastname}}</h5>
-        {{user.location}}
-        <p>Member since: {{user.date}}</p>
-        {{user.biography}}
-        </div>
-        <div class="">
-        <span class="postscount"><h6>{{user.numpost}}</h6><br>Posts</span>
-        <span class="followscount"><h6 id="follow">{{user.numfollower}}</h6><br>Followers</span>
-        </div>
-        <br>
-        <span v-if="uc==user.id"><button class="btn btn-primary but butsize1 hid">Follow</button></span>
-        <span v-else-if=" uc in user.follower"><button class="btn btn-primary but butsize1">Following</button></span>
-        <button class="btn btn-success" v-on:click="follow" >Follow</button>
-
-        <div class="userpic">
-        <ul class="profilepost__list">
-            <li v-for="post in user.posts"class="post_item" >
-                <div class="">
-                <img v-bind:src="post.photo" alt="Post image" style="width:340px;height:200px;"/>
-                </div>
-            </li>
-        </ul>
-        </div>
-        </div>
-        </div>
+  <div class=" row bg-white d-flex flex-row justify-content-between bg-white rounded shadow-sm p-3 mb-3">
+    <div class=" mr-2">
+      <img :src="'../' + user.photo" alt="User profile photo" class="profilePic">
     </div>
-    `,
-    data: function() {
-        return {
-            user:[],
-            uc:User_id,
-            Other:other,
-            post:[],
-            follow:[]
-        };
+    <div class="d-flex flex-column">
+      <p class="font-weight-bold text-muted"> {{user.firstname}} {{user.lastname}} </p>
+      <p class="text-muted"> 
+        {{user.location}} <br>
+        Member since {{user.joined_on}} 
+      </p>
+      <p class="text-muted"> {{user.biography}} </p>
+    </div>
+    <div class="d-flex flex-column justify-content-between">
+      <div class="d-flex flex-row justify-content-between">
+        <div class="d-flex flex-column justify-content-center align-items-center p-2">
+          <span class="font-weight-bold text-muted">{{ numPosts }}</span>
+          <p class="font-weight-bold text-muted">Posts</p>
+        </div>
+        <div class="d-flex flex-column justify-content-center align-items-center p-2">
+          <span class="font-weight-bold text-muted">{{ followers }}</span>
+          <p class="font-weight-bold text-muted">Followers</p>
+        </div>
+      </div>
+      <div v-if="!isUser">
+        <button v-if="user.isFollowing" @click="follow" class="btn btn-success font-weight-bold w-100">Following</button>
+        <button v-else v-on:click="follow" class="btn btn-primary font-weight-bold w-100">Follow</button>
+      </div>
+    </div>
+  </div>
+  <ul class="row list-inline">
+    <li class="col-sm-4" v-for="post in userposts">
+      <div class="card-body no-padding">
+        <img :src="'../' + post.photo" alt="Post photo" class="img-fluid card-img-top postPics">
+      </div>
+    </li>
+  </ul>
+</div>
+  `,
+  created: function(){
+    let self = this;
+    let current_user = localStorage.getItem('current_user');
+    self.isUser = current_user === self.$route.params.user_id;
+
+    
+    fetch(`/api/users/${self.$route.params.user_id}/posts`,{
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${localStorage.token}`
       },
-      created: function(){
-                  if (other==''){
-                          let self =this;
-                          let userid = ""+self.uc;
-                          fetch('/api/users/'+userid+'/posts',{
-                                  method:'GET',
-                                  'headers': {
-                                      'Authorization': 'Bearer ' + localStorage.getItem('token'),
-                                      'X-CSRFToken': token
-                                  },
-                                  credentials: 'same-origin'
-                              })
-                               .then(function(response){
-                                    return response.json();
-                                })
-                                .then(function(jsonResponse){
-                                    //display a success message
-                                    self.user= jsonResponse.response["0"]; 
-                                    //console.log(jsonResponse);
-                                })
-                                .catch(function(error){
-                                   // console.log(error);
-                                });
-                          }
-                  else{
-                       let self =this;
-                       let userid = ""+self.Other;
-                          fetch('/api/users/'+userid+'/posts',{
-                                  method:'GET',
-                                   'headers': {
-                                             'Authorization': 'Bearer ' + localStorage.getItem('token'),
-                                             'X-CSRFToken': token
-                                      },
-                                  credentials: 'same-origin'
-                              })
-                               .then(function(response){
-                                    return response.json();
-                                })
-                                .then(function(jsonResponse){
-                                    //display a success message
-                                    self.user= jsonResponse.response["0"]; 
-                                    //console.log(jsonResponse);
-                                })
-                                .catch(function(error){
-                                   //console.log(error);
-                                });
-                      }
-      },
-      methods:{
-          Follow:function(){
-              let self = this;
-              let userid = ""+self.Other;
-              let form_data = new FormData();
-              let se=self.uc;
-              form_data.append("user_id",userid);
-              form_data.append("follower_id",se);
-                      
-              fetch("/api/users/"+userid+"/follow", { 
-              method: 'POST',
-              body: form_data,
-              headers: {
-                  'Authorization': 'Bearer ' + localStorage.getItem('token'),
-                  'X-CSRFToken': token
-              },
-              credentials: 'same-origin'
-              })
-              .then(function (response) {
-              return response.json();
-              })
-              .then(function (jsonResponse) {
-              // display a success message
-              //console.log(jsonResponse);
-              let loginForm= document.getElementById('follow').innerHTML=jsonResponse.response['0'].follow;
-              let log= document.getElementById('fo').innerText="following";
-              })
-              .catch(function (error) {
-               //console.log(error);
-              });
-          }
+      credentials: 'same-origin'
+    })
+    .then(function (response){
+      return response.json();
+    })
+    .then(function (jsonResponse){
+      console.log(jsonResponse);
+      if(jsonResponse.hasOwnProperty("code")){
+        router.replace('/login');
       }
+      else{
+        let posts = jsonResponse.posts;
+        let uid = self.$route.params.user_id;
+        self.getUser(uid);
+        self.getFollowers(uid);
+        self.numPosts = posts.length;
+        self.userposts = posts;
+      }
+    })
+    .catch(function (error){
+      console.log(error);
+    });
+  },
+  data: function(){
+    return {
+      user: {},
+      isUser: false
+    };
+  },
+  methods: {
+    getUser: function(uid) {
+      let self = this;
+      
+      fetch(`/api/users/${uid}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${localStorage.token}`
+        },
+        credentials: 'same-origin'
+      })
+      .then(resp => resp.json())
+      .then(jsonResp => {
+        
+        if(jsonResp.hasOwnProperty("user")){
+          
+          self.user = jsonResp.user;
+        }
+      })
+      .catch(err => console.log(err));
+    },
+    getFollowers: function(id) {
+      let self = this;
+      fetch(`/api/users/${id}/follow`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${localStorage.token}`
+        },
+        credentials: 'same-origin'
+      })
+      .then(resp => resp.json())
+      .then(jsonResp => {
+        if(jsonResp.hasOwnProperty("followers")){
+          self.followers = jsonResp.followers;
+        }
+      })
+      .catch(err => console.log(err));
+    },
+    follow: function() {
+      let self = this;
 
+      fetch(`/api/users/${self.$route.params.user_id}/follow`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.token}`,
+          'X-CSRFToken': token
+        },
+        credentials: 'same-origin'
+      })
+      .then(resp => resp.json())
+      .then(jsonResp => {
+        if (jsonResp.hasOwnProperty("message")) {
+          self.followers++;
+          self.user.isFollowing = true;
+        }
+      })
+      .catch(err => console.log(err));
+    }
+  },
+  data: function(){
+    return {
+      user: {},
+      userposts: [],
+      following: false,
+      followers: 0,
+      numPosts: 0
+    };
+  }
 });
-
 
 Vue.use(VueRouter);
 // Define Routes
