@@ -247,15 +247,16 @@ def login():
 
     return jsonify(errors=[{"errors":form_errors(form)}])
 
-@app.route('/api/auth/logout',methods=['POST']) 
+@app.route('/api/auth/logout',methods=['GET']) 
 def logout():
-      if request.method == 'POST':
+    if request.method == 'GET':
+        logout_user()
         return jsonify({"message": "User successfully logged out"})
 
 
 @app.route('/api/posts/<post_id>/like',methods=['POST'])
 #@login_required
-# @requires_auth
+@requires_auth
 def like(post_id):
     """ set a like on the current post by the logged in user"""
     if request.method == 'POST':
