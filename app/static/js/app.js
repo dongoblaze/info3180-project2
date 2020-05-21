@@ -63,52 +63,35 @@ Vue.component('app-footer', {
 
 const Home = Vue.component('home', {
     template: `
-    <div @mouseover="Reset">
-          <h6 v-if="text=='User successfully logged out'" class="success">{{text}}</h6>
-          
-          <div v-if="uc!=''" id="home">
-          
-            <div class="float-">
-                <h1>  Photogram </h1>
-                    <p> Share Life experiences and moments.<br>So Please enjoy</p><br>
-            </div>
-          </div>
-             
-         <div v-else class="Frame">
-         <div class="row mx-md-n5">
-            <div class="homePic">
-                <img class="rounded float-left" src="/static/css/img.jpg" alt="home page picture" style="width:400px;height:400px;"/>
-            </div>
+      <div class="row">
+        <div class="alert alert-success col-md-12" role="alert" v-if='success'>
+          {{ notifs }}
         </div>
-            <div class="Welcome">
-                <div class="padtext">
-                    <h1> Photogram</h1>
-                    </div>
-                    <div class="pad">
-                    <p> Share photos of your favourite moments with friends, family and the world.</p> 
-                    </div>
-            
-                <div>   
-                <router-link to="/register" class="btn btn-success">Register</router-link>&nbsp
-                <router-link to="/login" class="btn btn-primary">Login</router-link>
-                </div>
-                </div> 
-        </div>  
-    </div>
-     `,
-data: function(){
-    return{
-        uc:User_id,
-        text:msg
-    };   
-    },
- methods:{
-      Reset:function ()
-        {
-            this.text="";
-        }
-   }
-});
+        <div class="col-sm-5 ml-5 mr-3 border-top rounded no-padding">
+          <img src="/static/css/img.jpg" alt="Photogram homepage photo" class="img-responsive" width="100%"/>
+        </div>
+        <div class="col-sm-5 bg-white border-top rounded">
+          <div>
+            <div class="card-header text-center bg-white">
+              <h3 class="title">
+                <i class="fas fa-camera d-inline-block"></i>
+                Photogram
+              </h3>
+            </div>
+            <div class="card-body">
+              <p> Share photos of your favourite moments with friends, family and around the world </p>
+            </div>
+            <router-link to="/register"><input type="submit" value="Register" class="btn btn-success ml-4 mr-2 col-lg-5 font-weight-bold"></router-link>
+              <router-link to="/login"><input type="submit" value="Login" class="btn btn-primary col-lg-5 font-weight-bold"></router-link>
+          </div>
+        </div>
+      </div>
+    `,
+    props: ['notifs', 'success'],
+    data: function() {
+      return {};
+    }
+  });
 
 const NotFound = Vue.component('not-found', {
     template: `
