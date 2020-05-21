@@ -178,29 +178,34 @@ const Login = Vue.component('login',{
     }
 });
 
-const Logout= Vue.component('logout-form',{
+const Logout= Vue.component('logout',{
     template:`
-    <div class="d-flex justify-content-center"> 
-    <h2>Logout</h2>
+    <div>
+        <h2> You have been logged out </h2>
+        <button @click="$router.push('/')"> Return to home page</button>
+
     </div>
     `,
-    created: function () {
-        fetch("api/auth/logout", {
-          method: "GET",
+    created: function() {
+        fetch('/api/auth/logout',{
+          method: 'GET',
+          headers: {
+              Authorization: 'Bearer ' + localStorage.getItem('token')
+          }
         })
-          .then(function (response) {
+        .then(function (response) {
             return response.json();
-          })
-          .then(function (jsonResponse) {
-            console.log(js);
-            localStorage.removeItem("current_user");
-            router.go();
-            router.push("/");
-          })
-          .catch(function (error) {
+        })
+        .then(function (jsonResponse) {
+            localStorage.removeItem('token');
+            sessionStorage.removeItem('usid');
+            console.log('Token removed from localStorage')
+            console.log(jsonResponse);
+        })
+        .catch(function (error) {
             console.log(error);
-          });
-      },
+        });
+    }
 });
 
 const Explore=Vue.component('explore',{
