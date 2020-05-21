@@ -11,8 +11,9 @@ import base64
  
 
 from app import app, db, login_manager,token_key
-from flask import render_template, request, redirect, url_for, flash, jsonify,json, session , _request_ctx_stack 
+from flask import g,render_template, request, redirect, url_for, flash,json, session , _request_ctx_stack 
 from flask_login import login_user, logout_user, current_user, login_required
+from flask.json import jsonify
 from.forms import UserRegistration, LoginForm, PostForm 
 from .models import Users,Posts,Follows, Likes
 from werkzeug.utils import secure_filename
@@ -123,6 +124,17 @@ def register():
             flash("already a member", 'danger')
             return jsonify(errors=[{"error":"You are already a member"}])
     return jsonify(errors=[{"errors":form_errors(form)}])
+@app.route("/api/users/<user_id>", methods=["GET"])
+@requires_auth
+def userDetails(user_id):
+    if request.method == 'GET':
+        users = Users.query.filter_by(id=user_id).first()
+    
+        current = [{"id": users.id, "username": users.username, "firstname": users.firstname, "lastname": users.lastname, "email": users.email, "location": users.location, "biography": users.biography, 
+        "photo": users.photo, "joined": users.joined_on.strftime("%b %Y")}]
+        
+    print(jsonify(current))
+    return jsonify(current)
 
 @app.route('/api/users/<user_id>/posts',methods=["POST","GET"]) 
 @requires_auth
@@ -235,17 +247,10 @@ def login():
 
     return jsonify(errors=[{"errors":form_errors(form)}])
 
-@app.route('/api/auth/logout',methods=['GET']) 
-@requires_auth
+@app.route('/api/auth/logout',methods=['POST']) 
 def logout():
-    """logout users"""
-    g.currrent_user=None
-    if session['userid']:
-        session.pop('userid')  
-        logout={"message":"User successfully logged out"}
-        return jsonify(response=[logout])
-    return jsonify(errors=[{"errors":"not logout"}])
-
+      if request.method == 'POST':
+        return jsonify({"message": "User successfully logged out"})
 
 
 @app.route('/api/posts/<post_id>/like',methods=['POST'])
